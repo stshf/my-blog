@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My blog </title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+                <h1><span class="highlight">My</span> Blog</h1>
+            </div>
+            <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+            <nav>
+                <ul id="menu">
+                    <li class="current"><a href="#">Home</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Introduce</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="showcase">
+        <div class="container">
+            <h1>Welcome to My Blog</h1>
+            <p>Here you'll find my thoughts, experiences, and insights.</p>
+        </div>
+    </section>
+
+    <section id="search-section">
+        <div class="container">
+            <form id="search-form">
+                <input type="text" id="search-input" placeholder="記事を検索...">
+                <button type="submit">検索</button>
+                <button type="button" id="reset-search">リセット</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="blog-posts">
+        <h2>最新の記事</h2>
+        <article>
+            <h3>初めてのブログ投稿</h3>
+            <p class="date">2024-07-17</p>
+            <p>ブログ始めました。よろしくお願いします。</p>
+
+            <div class="comments-section">
+                <h4>コメント</h4>
+                <ul class="comments-list">
+                    <!-- コメントが動的に追加される -->
+                </ul>
+                <form class="comment-form">
+                    <input type="text" class="commenter-name" placeholder="お名前" required>
+                    <textarea class="comment-text" placeholder="コメントを入力してください" required></textarea>
+                    <button type="submit">コメントを投稿</button>
+                </form>
+            </div>
+        </article>
+        <article>
+            <h3>Javascriptについて</h3>
+            <p class="date">2024-07-18</p>
+            <p>Javascriptの基礎について勉強中です</p>
+            <div class="comments-section">
+                <h4>コメント</h4>
+                <ul class="comments-list">
+                    <!-- コメントが動的に追加される -->
+                </ul>
+                <form class="comment-form">
+                    <input type="text" class="commenter-name" placeholder="お名前" required>
+                    <textarea class="comment-text" placeholder="コメントを入力してください" required></textarea>
+                    <button type="submit">コメントを投稿</button>
+                </form>
+            </div>
+        </article>       
+        <article>
+            <h3>CSS Layoutのこつ</h3>
+            <p class="date">2024-07-19</p>
+            <p>効果的なCSSレイアウトの方法を紹介します</p>
+            <div class="comments-section">
+                <h4>コメント</h4>
+                <ul class="comments-list">
+                    <!-- コメントが動的に追加される -->
+                </ul>
+                <form class="comment-form">
+                    <input type="text" class="commenter-name" placeholder="お名前" required>
+                    <textarea class="comment-text" placeholder="コメントを入力してください" required></textarea>
+                    <button type="submit">コメントを投稿</button>
+                </form>
+            </div>
+        </article>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 my blog</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle機能の設定
+            const menuToggle = document.querySelector('.menu-toggle');
+            const menu = document.getElementById('menu');
+
+            menuToggle.addEventListener('click', function() {
+                menu.classList.toggle('show');
+            });
+
+            window.addEventListener('resize', function() {
+                if (window.innerwidth > 768) {
+                    menu.classList.remove('show')
+                }
+            });
+
+            // コメント機能の設定
+            const commentForms = document.querySelectorAll('.comment-form');
+            commentForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const name = this.querySelector('.commenter-name').value;
+                    const text = this.querySelector('.comment-text').value;
+
+                    if (name && text) {
+                        addComment(this, name, text);
+                        this.reset();
+                    }
+                });
+            });
+
+            //検索機能の実装
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const resetButton = document.getElementById('reset-search');
+            const blogPosts = document.querySelectorAll('#blog-posts article');
+
+
+            function performSearch() {
+                const searchTerm = searchInput.value.toLowerCase();
+
+                blogPosts.forEach(post => {
+                    const title = post.querySelector('h3').textContent.toLowerCase();
+                    const content = post.querySelector('p:not(.date)').textContent.toLowerCase();
+
+                    if (title.includes(searchTerm) || content.includes(searchTerm)) {
+                        post.style.display = 'block';
+                    } else {
+                        post.style.display = 'none';
+                    }
+                });
+            }
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();       
+            performSearch();
+        });
+
+        // 検索入力欄の内容が変更されるたびに検索を実行
+        searchInput.addEventListener('input', performSearch);
+
+        // リセットボタンのイベントリスナー
+        resetButton.addEventListener('click', function() {
+            searchInput.value = '';
+            performSearch();
+        });
+
+        // comment
+        function addComment(form, name, text) {
+            const commentsList = form.closest('.comments-section').querySelector('.comments-list');
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>${name}</storng> - ${new Date().toLocaleString()}
+                <p>${text}</p>
+                `;
+            commentsList.appendChild(li);
+        }
+        });
+
+    </script>
+</body>
+</html>
