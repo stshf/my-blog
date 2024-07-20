@@ -1,0 +1,11 @@
+# log
+*.log
+
+# tmp
+*.tmp
+
+# cashedir
+__pycache__/
+
+# env
+.env
