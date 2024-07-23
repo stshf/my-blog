@@ -1,5 +1,5 @@
 import http.server
-import soketserver
+import socketserver
 
 PORT = 8000
 
