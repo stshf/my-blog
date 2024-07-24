@@ -12,11 +12,8 @@ class MyHandler(SimpleHTTPRequestHandler):
 
         if path == '/':
             self.send_file('public/index.html')
-        elif path == '/current/time':
+        elif path == '/current_time':
             self.send_dynamic_content(self.get_current_time())
-        elif path == '/greet':
-            name = query.get('name', ['Guest'][0])
-            self.send_dynamic_content(self.get_greeting(name))
         elif path == '/counter':
             self.send_dynamic_content(self.get_counter())
         else:
@@ -41,10 +38,6 @@ class MyHandler(SimpleHTTPRequestHandler):
         # 現在時刻を取得する処理
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         return f"<html><body><h1>Current Time</h1><p>{current_time}</p></body></html>"
-
-    def get_greeting(self, name):
-        # 挨拶メッセージを生成する処理
-        return f"<html><body><h1>Hello, {name}!</h1></body></html>"
 
     def get_counter(self):
         # アクセスカウンターの処理
