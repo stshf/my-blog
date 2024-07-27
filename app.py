@@ -2,6 +2,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 import json
+import urllib.parse
 
 class MyHandler(SimpleHTTPRequestHandler):
 
@@ -18,7 +19,46 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.send_dynamic_content(self.get_counter())
         else:
             super().do_GET()
-    
+
+    def do_POST(self):
+        if self.path == '/submit-form':
+            # コンテンツの長さを取得
+            content_length = int(self.headers['Content-Length'])
+            # POSTデータを読み取る
+            post_data = self.rfile.read(content_length).decode('utf-8')
+            # フォームデータをパース
+            form = urllib.parse.parse_qs(post_data)
+            
+            # フォームデータを処理
+            name = form.get('name', [''])[0]
+            email = form.get('email', [''])[0]
+            message = form.get('message', [''])[0]
+            
+            # レスポンスを送信
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.end_headers()
+            response = f"""
+            <html>
+            <head>
+            <meta charset="utf-8">
+            </head>
+            <body>
+            <h1>お問い合わせ受付完了</h1>
+            <p>以下の内容で受け付けました：</p>
+            <ul>
+                <li>お名前: {name}</li>
+                <li>メールアドレス: {email}</li>
+                <li>メッセージ: {message}</li>
+            </ul>
+            <a href="/">トップページに戻る</a>
+            </body>
+            </html>
+            """
+            self.wfile.write(response.encode('utf-8'))
+        else:
+            self.send_error(404, "Not Found")
+
     def send_file(self, filename):
         # ファイルを送信する処理
         self.send_response(200)
