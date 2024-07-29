@@ -3,6 +3,7 @@ from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 import json
 import urllib.parse
+import os
 
 class MyHandler(SimpleHTTPRequestHandler):
 
@@ -33,6 +34,9 @@ class MyHandler(SimpleHTTPRequestHandler):
             name = form.get('name', [''])[0]
             email = form.get('email', [''])[0]
             message = form.get('message', [''])[0]
+
+            # データをファイルに保存
+            self.save_inquiry(name, email, message)
             
             # レスポンスを送信
             self.send_response(200)
@@ -74,6 +78,18 @@ class MyHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content.encode())
 
+    def save_inquiry(self, name, email, message):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data = f"Timestamp: {timestamp}\nName: {name}\nEmail: {email}\nMessage: {message}\n\n"
+
+        log_dir = 'log'
+
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+
+        with open(os.path.join(log_dir, 'inquiries.txt'), 'a') as f:
+            f.write(data)
+
     def get_current_time(self):
         # 現在時刻を取得する処理
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -93,7 +109,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             json.dump(counter, f)
 
         return f"<html><body><h1>Visiter Count></h1><p>This page has been Visited {counter['count']} times.</p></body></html>"
-
 
 if __name__ == '__main__':
     server_address = ('', 8000)
