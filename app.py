@@ -1,13 +1,21 @@
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.cookies import SimpleCookie
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 import json
 import urllib.parse
 import os
+import uuid
+import sys
+
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
 
 class MyHandler(SimpleHTTPRequestHandler):
+    sessions = {}
 
     def do_GET(self):
+        self.load_session()
         parsed_path = urlparse(self.path)
         path = parsed_path.path
         query = parse_qs(parsed_path.query)
@@ -18,10 +26,14 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.send_dynamic_content(self.get_current_time())
         elif path == '/counter':
             self.send_dynamic_content(self.get_counter())
+        elif path == '/visit-count':
+            content = self.get_visit_count()
+            self.send_dynamic_content(content)
         else:
             super().do_GET()
 
     def do_POST(self):
+        self.load_session()
         if self.path == '/submit-form':
             # コンテンツの長さを取得
             content_length = int(self.headers['Content-Length'])
@@ -63,10 +75,35 @@ class MyHandler(SimpleHTTPRequestHandler):
         else:
             self.send_error(404, "Not Found")
 
+    def load_session(self):
+        self.cookie = SimpleCookie(self.headers.get('Cookie'))
+        session_id = self.cookie.get('session_id')
+        if session_id is None:
+            session_id = str(uuid.uuid4())
+            self.sessions[session_id] = {}
+        else:
+            session_id = session_id.value
+            if session_id not in self.sessions:
+                self.sessions[session_id] = {}
+        self.session_id = session_id
+        self.session = self.sessions[session_id]
+
+    def send_response(self, code, message=None):
+        super().send_response(code, message)
+        self.send_header('Set-Cookie', f'session_id={self.session_id}')
+
+    def get_visit_count(self):
+        count = self.session.get('visit_count', 0) + 1
+        self.session['visit_count'] = count
+        content = f"<html><body><h1>訪問回数</h1><p>あなたは{count}回目の訪問です.</p></body></html>"
+        print(f"Content encoding: {content.encode('utf-8')}")  # デバッグ用
+
+        return content
+
     def send_file(self, filename):
         # ファイルを送信する処理
         self.send_response(200)
-        self.send_header('Counter-type', 'text/html')
+        self.send_header('Content-type', 'text/html')
         self.end_headers()
         with open(filename, 'rb') as file:
             self.wfile.write(file.read())
@@ -74,9 +111,9 @@ class MyHandler(SimpleHTTPRequestHandler):
     def send_dynamic_content(self, content):
         # 動的コンテンツを送信する処理
         self.send_response(200)
-        self.send_header('Counter-type', 'text/html')
+        self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
-        self.wfile.write(content.encode())
+        self.wfile.write(content.encode('utf-8'))
 
     def save_inquiry(self, name, email, message):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

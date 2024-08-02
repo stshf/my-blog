@@ -9,5 +9,4 @@ WORKDIR /app
 COPY . /app
 
 # コンテナ起動時に実行されるコマンドを指定
-# CMD ["python", "-m", "http.server", "8000"]
 CMD ["python", "app.py"]
