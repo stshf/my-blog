@@ -93,11 +93,10 @@ class MyHandler(SimpleHTTPRequestHandler):
         self.send_header('Set-Cookie', f'session_id={self.session_id}')
 
     def get_visit_count(self):
+        # セッション管理機能テスト用の個人訪問回数カウンター
         count = self.session.get('visit_count', 0) + 1
         self.session['visit_count'] = count
         content = f"<html><body><h1>訪問回数</h1><p>あなたは{count}回目の訪問です.</p></body></html>"
-        print(f"Content encoding: {content.encode('utf-8')}")  # デバッグ用
-
         return content
 
     def send_file(self, filename):
